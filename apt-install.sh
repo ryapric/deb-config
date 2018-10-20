@@ -1,12 +1,13 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -eu
 
-# Big Ol' Install & Config script for .deb systems
-# ================================================
+# Big Ol' Install & Config script for .deb systems (but probably just *Ubuntu)
+# ============================================================================
 
 
-if [ "$EUID" -ne 0 || "$UID" -ne 0 ]; then
+if [ "$EUID" -ne 0 ]; then
     printf "This installer must be run as root, obviously. Aborting.\n" >&2
+    exit 1
 fi
 
 
@@ -20,6 +21,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
 
 apt-get dist-upgrade -y
 apt-get install -y \
+    sudo \
     nano \
     git \
     gcc \
@@ -57,7 +59,11 @@ printf "[user]\n    name = Ryan Price\n    email = ryapric@gmail.com\n" > ~/.git
 # Docker Installer BEGIN >>>
 # ----------------------
 
-curl -sSL https://get.docker.com | sh
+if ! command -v 'docker'; then
+    curl -sSL https://get.docker.com | sh
+fi
+
+usermod -aG docker "$SUDO_USER"
 
 # Docker Installer END <<<
 # --------------------
@@ -86,7 +92,7 @@ apt-get install -y \
     r-recommended
 
 Rscript -e "
-    install.packages(
+    install.packages( \
         c( \
             'tidyverse', \
             'data.table', \
