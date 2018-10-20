@@ -50,6 +50,9 @@ apt-get install -y \
 # Sys Config BEGIN >>>
 # ----------------
 
+# Add git branch highlighting to PS1 prompt
+sed -i '/if [ "$color_prompt" = yes ]; then/!b;n;c    PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\[\033[01;33m\]$(__git_ps1)\[\033[00m\]\$ "' ~/.bashrc
+
 printf "[user]\n    name = Ryan Price\n    email = ryapric@gmail.com\n" > ~/.gitconfig
 
 # Sys Config END <<<
