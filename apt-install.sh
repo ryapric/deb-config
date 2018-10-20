@@ -22,6 +22,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
 apt-get dist-upgrade -y
 apt-get install -y \
     sudo \
+    man \
     nano \
     git \
     gcc \
@@ -50,8 +51,8 @@ apt-get install -y \
 # Sys Config BEGIN >>>
 # ----------------
 
-# Add git branch highlighting to PS1 prompt
-sed -i '/if [ "$color_prompt" = yes ]; then/!b;n;c    PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\[\033[01;33m\]$(__git_ps1)\[\033[00m\]\$ "' ~/.bashrc
+# Add git branch highlighting to PS1 prompt (but note that this will ignore all the other PS1 changes the file tries)
+printf "\n\nPS1=\"${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\[\033[01;33m\]$(__git_ps1)\[\033[00m\]\$ \"\n\n" > ~/.bashrc
 
 printf "[user]\n    name = Ryan Price\n    email = ryapric@gmail.com\n" > ~/.gitconfig
 
@@ -66,7 +67,9 @@ if ! command -v 'docker'; then
     curl -sSL https://get.docker.com | sh
 fi
 
-usermod -aG docker "$SUDO_USER"
+if [ "$UID" -ne 0 ]; then
+    usermod -aG docker "$SUDO_USER"
+fi
 
 # Docker Installer END <<<
 # --------------------
@@ -95,25 +98,32 @@ apt-get install -y \
     r-recommended
 
 Rscript -e "
-    install.packages( \
-        c( \
-            'tidyverse', \
-            'data.table', \
-            'devtools', \
-            'RcppRoll', \
-            'odbc', \
-            'RSQLite', \
-            'RPostgres', \
-            'RMySQL', \
-            'RMariaDB' \
-        ), \
-        dependencies = TRUE, \
-        repos = 'https://cloud.r-project.org/' \
-    )
+    pkgs <- c( \
+        'tidyverse', \
+        'data.table', \
+        'devtools', \
+        'testthat', \
+        'knitr', \
+        'roxygen2', \
+        'rmarkdown', \
+        'RcppRoll', \
+        'odbc', \
+        'RSQLite', \
+        'RPostgres', \
+        'RMySQL', \
+        'RMariaDB' \
+    ); \
+    for (i in pkgs) { \
+        inst_pkgs <- as.data.frame(installed.packages())\$Package; \
+        if (!(i %in% inst_pkgs)) { \
+            sprintf(\"%s is already installed\", i); \
+            install.packages(i, repos = 'https://cloud.r-project.org/') \
+        } \
+    }
 "
 
-rstudio_debfile="~/rstudio-bin.deb"
-curl -o "$rstudio_debfile" 'https://download1.rstudio.org/rstudio-xenial-1.1.456-amd64.deb'
+rstudio_debfile="${HOME}/rstudio-bin.deb"
+curl -sSL 'https://download1.rstudio.org/rstudio-xenial-1.1.456-amd64.deb' -o "$rstudio_debfile"
 gdebi --n "$rstudio_debfile"
 rm "$rstudio_debfile"
 
@@ -132,7 +142,6 @@ apt-get install -y \
 
 pip3 install \
     pandas \
-    requests \
     flask
 
 # Python Installer END <<<
