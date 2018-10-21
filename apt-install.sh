@@ -52,9 +52,20 @@ apt-get install -y \
 # ----------------
 
 # Add git branch highlighting to PS1 prompt (but note that this will ignore all the other PS1 changes the file tries)
-printf "\n\nPS1=\"${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\[\033[01;33m\]$(__git_ps1)\[\033[00m\]\$ \"\n\n" > ~/.bashrc
+# First, provide the `__git_ps1` command
+if [ ! -e ~/.bash_git ]; then
+    curl -L 'https://raw.github.com/git/git/master/contrib/completion/git-prompt.sh' > ~/.bash_git
+    echo -e "\nsource ~/.bash_git\n" >> ~/.bashrc
+    source ~/.bash_git
+fi
 
-printf "[user]\n    name = Ryan Price\n    email = ryapric@gmail.com\n" > ~/.gitconfig
+if ! grep --quiet '__git_ps1' ~/.bashrc; then
+    echo -e "\nPS1=\"${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\[\033[01;33m\]$(__git_ps1)\[\033[00m\]\$ \"\n" >> ~/.bashrc
+fi
+
+if ! grep --quiet '[user]' ~/.gitconfig; then
+    echo -e "[user]\n\tname = Ryan Price\n\temail = ryapric@gmail.com\n" > ~/.gitconfig
+fi
 
 # Sys Config END <<<
 # --------------
@@ -122,10 +133,12 @@ Rscript -e "
     }
 "
 
-rstudio_debfile="${HOME}/rstudio-bin.deb"
-curl -sSL 'https://download1.rstudio.org/rstudio-xenial-1.1.456-amd64.deb' -o "$rstudio_debfile"
-gdebi --n "$rstudio_debfile"
-rm "$rstudio_debfile"
+if ! command -v 'rstudio'; then
+    rstudio_debfile="${HOME}/rstudio-bin.deb"
+    curl -sSL 'https://download1.rstudio.org/rstudio-xenial-1.1.456-amd64.deb' -o "$rstudio_debfile"
+    gdebi --n "$rstudio_debfile"
+    rm "$rstudio_debfile"
+fi
 
 # R Installer END <<<
 # ---------------
