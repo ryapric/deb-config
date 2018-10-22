@@ -156,8 +156,7 @@ apt-get install -y \
     spyder3
 
 pip3 install \
-    pandas \
-    flask
+    wheel
 
 # Python Installer END <<<
 # --------------------
