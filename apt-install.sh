@@ -65,7 +65,7 @@ apt-get install -y \
 #    echo -e "\nPS1=\"${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\[\033[01;33m\]$(__git_ps1)\[\033[00m\]\$ \"\n" >> ~/.bashrc
 #fi
 
-if ! grep --quiet '[user]' ~/.gitconfig; then
+if [ ! -e ~/.gitconfig ] || ! grep --quiet '[user]' ~/.gitconfig; then
     echo -e "[user]\n\tname = Ryan Price\n\temail = ryapric@gmail.com\n" > ~/.gitconfig
 fi
 
@@ -96,6 +96,7 @@ if ! grep --quiet 'cran' /etc/apt/sources.list; then
     echo "$cran_deb" | tee -a /etc/apt/sources.list
 fi
 
+# Retries, in case key signing fails
 for key in 'E298A3A825C0D65DFD57CBB651716619E084DAB9'; do
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys "$key" ||
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys "$key" ||
@@ -110,7 +111,8 @@ apt-get install -y \
     r-base-dev \
     r-recommended
 
-Rscript -e "
+sudo -H -u "$SUDO_USER" Rscript -e "
+    dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE); \
     pkgs <- c( \
         'tidyverse', \
         'data.table', \
@@ -129,8 +131,8 @@ Rscript -e "
     for (i in pkgs) { \
         inst_pkgs <- as.data.frame(installed.packages())\$Package; \
         if (!(i %in% inst_pkgs)) { \
-            sprintf(\"%s is already installed\", i); \
-            install.packages(i, repos = 'https://cloud.r-project.org/') \
+            sprintf('%s is already installed', i); \
+            install.packages(i, repos = 'https://cloud.r-project.org/', lib = Sys.getenv('R_LIBS_USER')) \
         } \
     }
 "
@@ -155,7 +157,7 @@ apt-get install -y \
     ipython3 \
     spyder3
 
-pip3 install \
+sudo -H -u "$SUDO_USER" pip3 install \
     wheel
 
 # Python Installer END <<<
