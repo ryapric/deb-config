@@ -5,6 +5,11 @@ set -eu
 # ============================================================================
 
 
+# Set SUDO_USER if running as root user itself (useful for testing)
+if [ "$UID" -eq 0 ]; then
+    SUDO_USER=root
+]
+
 if [ "$EUID" -ne 0 ]; then
     printf "This installer must be run as root, obviously. Aborting.\n" >&2
     exit 1
@@ -14,13 +19,13 @@ fi
 # Sys Installer BEGIN >>>
 # -------------------
 
-apt-get update
+apt-get -qq update
 
-# Prevent interactive config prompt for tzdata
+# Prevent future interactive config prompt for tzdata
 DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
 
-apt-get dist-upgrade -y
-apt-get install -y \
+apt-get -qq dist-upgrade
+apt-get -qq install \
     sudo \
     man \
     nano \
@@ -105,8 +110,8 @@ for key in 'E298A3A825C0D65DFD57CBB651716619E084DAB9'; do
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys "$key"
 done
 
-apt-get update
-apt-get install -y \
+apt-get -qq update
+apt-get -qq install \
     r-base \
     r-base-dev \
     r-recommended
@@ -151,7 +156,7 @@ fi
 # Python Installer BEGIN >>>
 # ----------------------
 
-apt-get install -y \
+apt-get install -qq \
     python3 \
     python3-pip \
     ipython3 \
@@ -164,6 +169,6 @@ sudo -H -u "$SUDO_USER" pip3 install \
 # --------------------
 
 
-apt-get autoremove -y
+apt-get -qy autoremove
 
 exit 0
