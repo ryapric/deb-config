@@ -8,12 +8,16 @@ set -eu
 # Set SUDO_USER if running as root user itself (useful for testing)
 if [ "$UID" -eq 0 ]; then
     SUDO_USER=root
-]
+fi
 
 if [ "$EUID" -ne 0 ]; then
     printf "This installer must be run as root, obviously. Aborting.\n" >&2
     exit 1
 fi
+
+
+# Top-level setting for what user supporting packages are being installed for
+LIBS_USER="$SUDO_USER"
 
 
 # Sys Installer BEGIN >>>
@@ -116,7 +120,7 @@ apt-get -qq install \
     r-base-dev \
     r-recommended
 
-sudo -H -u "$SUDO_USER" Rscript -e "
+sudo -H -u "$LIBS_USER" Rscript -e "
     dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE); \
     pkgs <- c( \
         'tidyverse', \
@@ -162,7 +166,7 @@ apt-get install -qq \
     ipython3 \
     spyder3
 
-sudo -H -u "$SUDO_USER" pip3 install \
+sudo -H -u "$LIBS_USER" pip3 install \
     wheel
 
 # Python Installer END <<<
