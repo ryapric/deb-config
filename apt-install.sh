@@ -5,11 +5,6 @@ set -eu
 # ============================================================================
 
 
-# Set SUDO_USER if running as root user itself (useful for testing)
-if [ "$UID" -eq 0 ]; then
-    SUDO_USER=root
-fi
-
 if [ "$EUID" -ne 0 ]; then
     printf "This installer must be run as root, obviously. Aborting.\n" >&2
     exit 1
@@ -17,11 +12,14 @@ fi
 
 
 # Top-level setting for what user supporting packages are being installed for
+# This should help prevent the right user name from being masked from anywhere later
 LIBS_USER="$SUDO_USER"
 
 
 # Sys Installer BEGIN >>>
 # -------------------
+
+echo "Upgrading & installing system packages..."
 
 apt-get -qq update
 
@@ -74,6 +72,8 @@ apt-get -qq install \
 #    echo -e "\nPS1=\"${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]\[\033[01;33m\]$(__git_ps1)\[\033[00m\]\$ \"\n" >> ~/.bashrc
 #fi
 
+echo "Setting configuration files..."
+
 if [ ! -e ~/.gitconfig ] || ! grep --quiet '[user]' ~/.gitconfig; then
     echo -e "[user]\n\tname = Ryan Price\n\temail = ryapric@gmail.com\n" > ~/.gitconfig
 fi
@@ -82,16 +82,30 @@ fi
 # --------------
 
 
+# Firefox Installer BEGIN >>>
+# -----------------------
+
+echo "Getting the latest version of Firefox..."
+
+if [ ! -e /etc/apt/sources.list.d/*firefox* ]; then
+    apt-add-repository ppa:mozillateam/firefox-next
+    apt-get -qq update && apt-get -qy install firefox
+fi
+
+# Firefox Installer END <<<
+# ---------------------
+
+
 # Docker Installer BEGIN >>>
 # ----------------------
 
+echo "Installing Docker..."
+
 if ! command -v 'docker'; then
     curl -sSL https://get.docker.com | sh
+    usermod -aG docker "$LIBS_USER"
 fi
 
-if [ "$UID" -ne 0 ]; then
-    usermod -aG docker "$SUDO_USER"
-fi
 
 # Docker Installer END <<<
 # --------------------
@@ -99,6 +113,8 @@ fi
 
 # R Installer BEGIN >>>
 # -----------------
+
+echo "Installing R..."
 
 if ! grep --quiet 'cran' /etc/apt/sources.list; then
     cran_deb="deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran35/"
@@ -137,10 +153,11 @@ sudo -H -u "$LIBS_USER" Rscript -e "
         'RMySQL', \
         'RMariaDB' \
     ); \
+    inst_pkgs <- as.data.frame(installed.packages())\$Package; \
     for (i in pkgs) { \
-        inst_pkgs <- as.data.frame(installed.packages())\$Package; \
-        if (!(i %in% inst_pkgs)) { \
-            sprintf('%s is already installed', i); \
+        if (i %in% inst_pkgs) { \
+            print(paste(i, 'is already installed')); \
+        } else { \
             install.packages(i, repos = 'https://cloud.r-project.org/', lib = Sys.getenv('R_LIBS_USER')) \
         } \
     }
@@ -159,6 +176,8 @@ fi
 
 # Python Installer BEGIN >>>
 # ----------------------
+
+echo "Installing Python..."
 
 apt-get install -qq \
     python3 \
@@ -179,6 +198,8 @@ sudo -H -u "$LIBS_USER" pip3 install --user \
 # DBeaver Installer BEGIN >>>
 # -----------------------
 
+echo "Installing DBeaver..."
+
 if ! command -v 'dbeaver'; then
     dbeaver_debfile="${HOME}/dbeaver.deb"
     curl -sSL -o "$dbeaver_debfile" 'https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb'
@@ -190,6 +211,10 @@ fi
 # ---------------------
 
 
+echo "Cleaning up..."
+
 apt-get -qy autoremove
+
+echo "Done!"
 
 exit 0
