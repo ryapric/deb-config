@@ -163,11 +163,14 @@ fi
 apt-get install -qq \
     python3 \
     python3-pip \
+    python3-venv \
     ipython3 \
     spyder3
 
-sudo -H -u "$LIBS_USER" pip3 install \
-    wheel
+sudo -H -u "$LIBS_USER" pip3 install --user \
+    wheel \
+    pandas \
+    flask
 
 # Python Installer END <<<
 # --------------------
