@@ -148,7 +148,7 @@ sudo -H -u "$LIBS_USER" Rscript -e "
 
 if ! command -v 'rstudio'; then
     rstudio_debfile="${HOME}/rstudio-bin.deb"
-    curl -sSL 'https://download1.rstudio.org/rstudio-xenial-1.1.456-amd64.deb' -o "$rstudio_debfile"
+    curl -sSL -o "$rstudio_debfile" 'https://download1.rstudio.org/rstudio-xenial-1.1.456-amd64.deb'
     gdebi --n "$rstudio_debfile"
     rm "$rstudio_debfile"
 fi
@@ -174,6 +174,20 @@ sudo -H -u "$LIBS_USER" pip3 install --user \
 
 # Python Installer END <<<
 # --------------------
+
+
+# DBeaver Installer BEGIN >>>
+# -----------------------
+
+if ! command -v 'dbeaver'; then
+    dbeaver_debfile="${HOME}/dbeaver.deb"
+    curl -sSL -o "$dbeaver_debfile" 'https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb'
+    gdebi --n "$dbeaver_debfile"
+    rm "$dbeaver_debfile"
+fi
+
+# DBeaver Installer END <<<
+# ---------------------
 
 
 apt-get -qy autoremove
