@@ -5,8 +5,14 @@ set -eu
 # ============================================================================
 
 
+# Bold echo
+echob () {
+    echo $(tput bold)$@
+}
+
+
 if [ "$EUID" -ne 0 ]; then
-    printf "This installer must be run as root, obviously. Aborting.\n" >&2
+    echob "This installer must be run as root, obviously. Aborting." >&2
     exit 1
 fi
 
@@ -19,7 +25,7 @@ LIBS_USER="$SUDO_USER"
 # Sys Installer BEGIN >>>
 # -------------------
 
-echo "Upgrading & installing system packages..."
+echob "Upgrading & installing system packages..."
 
 apt-get -qq update
 
@@ -59,6 +65,7 @@ apt-get -qq install \
 # Sys Config BEGIN >>>
 # ----------------
 
+echob "Setting up dotfile/other configs..."
 curl -sSL -o dotfiles.sh https://raw.githubusercontent.com/ryapric/dotfiles/master/dotfiles.sh
 bash dotfiles.sh -d
 rm dotfiles.sh
@@ -70,7 +77,7 @@ rm dotfiles.sh
 # Firefox Installer BEGIN >>>
 # -----------------------
 
-echo "Getting the latest version of Firefox..."
+echob "Getting the latest version of Firefox..."
 
 if [ ! -e /etc/apt/sources.list.d/*firefox* ]; then
     apt-add-repository ppa:mozillateam/firefox-next
@@ -84,7 +91,7 @@ fi
 # Docker Installer BEGIN >>>
 # ----------------------
 
-echo "Installing Docker..."
+echob "Installing Docker..."
 
 if ! command -v 'docker'; then
     curl -sSL https://get.docker.com | sh
@@ -99,7 +106,7 @@ fi
 # R Installer BEGIN >>>
 # -----------------
 
-echo "Installing R..."
+echob "Installing R..."
 
 if ! grep --quiet 'cran' /etc/apt/sources.list; then
     cran_deb="deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran35/"
@@ -162,7 +169,7 @@ fi
 # Python Installer BEGIN >>>
 # ----------------------
 
-echo "Installing Python..."
+echob "Installing Python..."
 
 apt-get install -qq \
     python3 \
@@ -183,7 +190,7 @@ sudo -H -u "$LIBS_USER" pip3 install --user \
 # DBeaver Installer BEGIN >>>
 # -----------------------
 
-echo "Installing DBeaver..."
+echob "Installing DBeaver..."
 
 if ! command -v 'dbeaver'; then
     dbeaver_debfile="${HOME}/dbeaver.deb"
@@ -196,10 +203,28 @@ fi
 # ---------------------
 
 
-echo "Cleaning up..."
+# Microsoft Installer BEGIN >>>
+# -------------------------
+
+echob "Installing MS products (Powershell, etc.)"
+
+# Import keys for all MS products, add repo, and install
+curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+if [ ! -e /etc/apt/sources.list.d/microsoft* ]; then
+    curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | tee /etc/apt/sources.list.d/microsoft.list
+fi
+apt-get -qq update
+apt-get install -qy \
+    powershell
+
+# Microsoft Installer END <<<
+# -----------------------
+
+
+echob "Cleaning up..."
 
 apt-get -qy autoremove
 
-echo "Done!"
+echob "Done!"
 
 exit 0
