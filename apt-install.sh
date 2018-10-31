@@ -49,7 +49,8 @@ apt-get -qq install \
     libmariadb-dev \
     libpq-dev \
     libssh2-1-dev \
-    unixodbc-dev
+    unixodbc-dev \
+    libreoffice
 
 # Sys Installer END <<<
 # -----------------
