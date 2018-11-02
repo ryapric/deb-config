@@ -188,6 +188,28 @@ sudo -H -u "$LIBS_USER" pip3 install --user \
 # --------------------
 
 
+# Julia Installer BEGIN >>>
+# ---------------------
+
+echo "Installing Julia..."
+
+julia_ver="1.0.1"
+
+if ! command -v 'julia'; then
+    curl -sSL \
+        -o julia.tar.gz \
+        https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-${julia_ver}-linux-x86_64.tar.gz
+    tar -xf julia.tar.gz
+    rm julia.tar.gz
+    mkdir /usr/share/julia/
+    mv julia-${julia_ver} /usr/share/julia/
+    ln -s /usr/share/julia/julia-${julia_ver}/bin/julia /usr/bin/julia
+fi
+
+# Julia Installer END <<<
+# -------------------
+
+
 # DBeaver Installer BEGIN >>>
 # -----------------------
 
