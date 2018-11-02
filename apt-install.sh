@@ -38,6 +38,7 @@ apt-get -qq install \
     man \
     nano \
     git \
+    htop \
     gcc \
     make \
     perl \
