@@ -235,15 +235,20 @@ fi
 # Microsoft Installer BEGIN >>>
 # -------------------------
 
-echob "Installing MS products (Powershell, etc.)"
+echob "Installing MS products (VS Code, Powershell, etc.)"
 
-# Import keys for all MS products, add repo, and install
+# Import keys for all MS products, add repo(s), and install
 curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
+
 if [ ! -e /etc/apt/sources.list.d/microsoft* ]; then
     curl -L https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | tee /etc/apt/sources.list.d/microsoft.list
 fi
+
 apt-get -qq update
 apt-get install -qy \
+    code \
     powershell
 
 # Microsoft Installer END <<<
