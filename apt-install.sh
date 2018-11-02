@@ -67,7 +67,7 @@ apt-get -qq install \
 # ----------------
 
 echob "Setting up dotfile/other configs..."
-curl -sSL -o dotfiles.sh https://raw.githubusercontent.com/ryapric/dotfiles/master/dotfiles.sh
+curl -L -o dotfiles.sh https://raw.githubusercontent.com/ryapric/dotfiles/master/dotfiles.sh
 bash dotfiles.sh -d
 rm dotfiles.sh
 
@@ -95,7 +95,7 @@ fi
 echob "Installing Docker..."
 
 if ! command -v 'docker'; then
-    curl -sSL https://get.docker.com | sh
+    curl -L https://get.docker.com | sh
     usermod -aG docker "$LIBS_USER"
 fi
 
@@ -158,7 +158,7 @@ sudo -H -u "$LIBS_USER" Rscript -e "
 
 if ! command -v 'rstudio'; then
     rstudio_debfile="${HOME}/rstudio-bin.deb"
-    curl -sSL -o "$rstudio_debfile" 'https://download1.rstudio.org/rstudio-xenial-1.1.456-amd64.deb'
+    curl -L -o "$rstudio_debfile" 'https://download1.rstudio.org/rstudio-xenial-1.1.456-amd64.deb'
     gdebi --n "$rstudio_debfile"
     rm "$rstudio_debfile"
 fi
@@ -196,7 +196,7 @@ echo "Installing Julia..."
 julia_ver="1.0.1"
 
 if ! command -v 'julia'; then
-    curl -sSL \
+    curl -L \
         -o julia.tar.gz \
         https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-${julia_ver}-linux-x86_64.tar.gz
     tar -xf julia.tar.gz
@@ -217,7 +217,7 @@ echob "Installing DBeaver..."
 
 if ! command -v 'dbeaver'; then
     dbeaver_debfile="${HOME}/dbeaver.deb"
-    curl -sSL -o "$dbeaver_debfile" 'https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb'
+    curl -L -o "$dbeaver_debfile" 'https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb'
     gdebi --n "$dbeaver_debfile"
     rm "$dbeaver_debfile"
 fi
@@ -232,9 +232,9 @@ fi
 echob "Installing MS products (Powershell, etc.)"
 
 # Import keys for all MS products, add repo, and install
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 if [ ! -e /etc/apt/sources.list.d/microsoft* ]; then
-    curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | tee /etc/apt/sources.list.d/microsoft.list
+    curl -L https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | tee /etc/apt/sources.list.d/microsoft.list
 fi
 apt-get -qq update
 apt-get install -qy \
