@@ -206,6 +206,12 @@ if ! command -v 'julia'; then
     ln -s /usr/share/julia/julia-${julia_ver}/bin/julia /usr/bin/julia
 fi
 
+if ! command -v 'atom'; then
+    curl -L -o atom.deb https://atom.io/download/deb
+    gdebi --n atom.deb
+    rm atom.deb
+fi
+
 # Julia Installer END <<<
 # -------------------
 
