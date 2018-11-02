@@ -206,11 +206,11 @@ if ! command -v 'julia'; then
     ln -s /usr/share/julia/julia-${julia_ver}/bin/julia /usr/bin/julia
 fi
 
-if ! command -v 'atom'; then
-    curl -L -o atom.deb https://atom.io/download/deb
-    gdebi --n atom.deb
-    rm atom.deb
-fi
+#if ! command -v 'atom'; then
+#    curl -L -o atom.deb https://atom.io/download/deb
+#    gdebi --n atom.deb
+#    rm atom.deb
+#fi
 
 # Julia Installer END <<<
 # -------------------
@@ -240,7 +240,9 @@ echob "Installing MS products (VS Code, Powershell, etc.)"
 # Import keys for all MS products, add repo(s), and install
 curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 
-echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
+if [ ! -e /etc/apt/sources.list.d/vscode.list ]; then
+    echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
+fi
 
 if [ ! -e /etc/apt/sources.list.d/microsoft* ]; then
     curl -L https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | tee /etc/apt/sources.list.d/microsoft.list
