@@ -57,7 +57,8 @@ apt-get -qq install \
     libpq-dev \
     libssh2-1-dev \
     unixodbc-dev \
-    libreoffice
+    libreoffice \
+    compton
 
 # Sys Installer END <<<
 # -----------------
@@ -67,9 +68,10 @@ apt-get -qq install \
 # ----------------
 
 echob "Setting up dotfile/other configs..."
-curl -L -o dotfiles.sh https://raw.githubusercontent.com/ryapric/dotfiles/master/dotfiles.sh
+git clone https://github.com/ryapric/dotfiles.git dotfiles_tmp
+cd dotfiles_tmp/
 bash dotfiles.sh -d
-rm dotfiles.sh
+cd .. && rm -rf dotfiles_tmp/
 
 # Sys Config END <<<
 # --------------
